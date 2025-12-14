@@ -1,248 +1,170 @@
 <!DOCTYPE html>
 <html lang="ar">
 <head>
-<meta charset="UTF-8">
-<title>بوابة المؤتمر العلمي للكيمياء</title>
+    <meta charset="UTF-8" />
+    <title>بوابة المؤتمر العلمي للكيمياء</title>
 
-<style>
-  body {
-    margin: 0;
-    font-family: Tahoma, Arial, sans-serif;
-    direction: rtl;
-    background: #020617;
-    color: #e5e7eb;
-  }
+    <style>
+        body {
+            margin: 0;
+            font-family: Tahoma, Arial, sans-serif;
+            direction: rtl;
+            background: #020617;
+            color: #e5e7eb;
+        }
 
-  /* هيدر الشعار */
-  .top-header {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    padding: 10px 20px;
-    background: #020617;
-    border-bottom: 1px solid #1e293b;
-    position: sticky;
-    top: 0;
-    z-index: 1000;
-  }
+        .top-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 10px 20px;
+            background: #020617;
+            border-bottom: 1px solid #1e293b;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
 
-  .top-header img {
-    height: 60px;
-    border-radius: 10px;
-  }
+        .top-header img {
+            height: 60px;
+            border-radius: 10px;
+        }
 
-  .top-header .title-block {
-    display: flex;
-    flex-direction: column;
-  }
+        .title-block .main-title {
+            font-size: 17px;
+            font-weight: bold;
+        }
 
-  .top-header .main-title {
-    font-size: 17px;
-    font-weight: bold;
-  }
+        .title-block .sub-title {
+            font-size: 12px;
+            color: #94a3b8;
+        }
 
-  .top-header .sub-title {
-    font-size: 12px;
-    color: #94a3b8;
-  }
+        .container {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 20px;
+        }
 
-  .container {
-    max-width: 960px;
-    margin: 0 auto;
-    padding: 20px;
-  }
+        .icon-row {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
 
-  .icon-row {
-    display: flex;
-    gap: 16px;
-    justify-content: center;
-    margin: 30px 0;
-    flex-wrap: wrap;
-  }
+        .icon-card {
+            background: #0f172a;
+            padding: 16px;
+            width: 260px;
+            text-align: center;
+            border-radius: 16px;
+            cursor: pointer;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.4);
+            transition: 0.2s;
+        }
 
-  .icon-card {
-    background: #0f172a;
-    border-radius: 16px;
-    padding: 16px;
-    width: 260px;
-    text-align: center;
-    cursor: pointer;
-    box-shadow: 0 15px 30px rgba(0,0,0,0.4);
-    transition: 0.25s;
-  }
+        .icon-card:hover {
+            transform: translateY(-4px);
+        }
 
-  .icon-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 25px 40px rgba(0,0,0,0.6);
-  }
+        .section { display: none; }
+        .section.active { display: block; }
 
-  .icon-emoji {
-    font-size: 40px;
-    margin-bottom: 8px;
-  }
+        input, button {
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            border: none;
+            margin-top: 10px;
+        }
 
-  .section {
-    display: none;
-    background: #020617;
-    padding: 16px;
-    border: 1px solid #1f2937;
-    border-radius: 16px;
-    margin-bottom: 40px;
-  }
+        button {
+            background: #22c55e;
+            color: #020617;
+            font-weight: bold;
+        }
 
-  .section.active {
-    display: block;
-  }
+        table {
+            width: 100%;
+            margin-top: 15px;
+            border-collapse: collapse;
+        }
 
-  /* نموذج الحضور */
-  .form-row { margin-bottom: 10px; }
-  label { display: block; margin-bottom: 4px; }
-  input {
-    width: 100%;
-    padding: 8px;
-    border-radius: 8px;
-    border: none;
-  }
-  button {
-    padding: 8px 16px;
-    border-radius: 8px;
-    border: none;
-    font-weight: bold;
-    background: #22c55e;
-    color: #020617;
-    cursor: pointer;
-  }
+        th, td {
+            padding: 10px;
+            border: 1px solid #334155;
+        }
 
-  /* الأفاتار */
-  .avatar-card {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
+        th {
+            background: #1e293b;
+        }
+    </style>
 
-  .avatar-face {
-    width: 90px;
-    height: 90px;
-    border-radius: 50%;
-    border: 3px solid #22c55e;
-    overflow: hidden;
-  }
-
-  .chat-log {
-    height: 230px;
-    padding: 10px;
-    overflow-y: auto;
-    background: #0b1120;
-    border-radius: 8px;
-    border: 1px solid #1f2937;
-    margin-top: 10px;
-  }
-
-  table {
-    width: 100%;
-    border-collapse: collapse;
-  }
-  th, td {
-    padding: 8px;
-    border: 1px solid #1f2937;
-  }
-  th {
-    background: #111827;
-  }
-
-</style>
 </head>
 
 <body>
 
-<!-- الهيدر والشعار -->
-<div class="top-header">
-  <img src="logo.jpg" alt="Conference Logo">
-  <div class="title-block">
-    <div class="main-title">Chemistry Horizons – SSC2 2026</div>
-    <div class="sub-title">Jerash University • Second Scientific Conference in Chemistry</div>
-  </div>
-</div>
-
-<div class="container">
-
-  <!-- الأيقونات -->
-  <div class="icon-row">
-    <div class="icon-card" onclick="showSection('attendance')">
-      <div class="icon-emoji">📝</div>
-      <strong>تسجيل الحضور</strong><br>
-      <small>الإسم – الجامعة – البريد الإلكتروني</small>
+    <div class="top-header">
+        <img src="logo.jpg" alt="Conference Logo">
+        <div class="title-block">
+            <div class="main-title">Chemistry Horizons – SSC2 2026</div>
+            <div class="sub-title">Jerash University • Second Scientific Conference in Chemistry</div>
+        </div>
     </div>
 
-    <div class="icon-card" onclick="showSection('avatar')">
-      <div class="icon-emoji">🤖</div>
-      <strong>أفاتار المؤتمر</strong><br>
-      <small>العربية + ترجمة إنجليزية</small>
+    <div class="container">
+
+        <div class="icon-row">
+            <div class="icon-card" onclick="showSection('attendance')">
+                📝<br>تسجيل الحضور
+            </div>
+
+            <div class="icon-card" onclick="showSection('avatar')">
+                🤖<br>أفاتار المؤتمر
+            </div>
+
+            <div class="icon-card" onclick="showSection('schedule')">
+                📅<br>جدول المؤتمر
+            </div>
+        </div>
+
+        <!-- حضور -->
+        <div id="attendance" class="section active">
+            <h2>تسجيل الحضور</h2>
+            <input id="name" placeholder="الاسم الكامل">
+            <input id="university" placeholder="الجامعة">
+            <input id="email" placeholder="البريد الإلكتروني">
+            <button onclick="registerAttendance()">تسجيل</button>
+            <div id="regMsg"></div>
+        </div>
+
+        <!-- أفاتار -->
+        <div id="avatar" class="section">
+            <h2>أفاتار المؤتمر</h2>
+            <div id="chatLog" style="height:220px; overflow-y:auto; background:#0f172a; padding:10px; border-radius:10px;"></div>
+            <input id="question" placeholder="اكتب سؤالك...">
+            <button onclick="askAvatar()">إرسال</button>
+        </div>
+
+        <!-- جدول -->
+        <div id="schedule" class="section">
+            <h2>جدول المؤتمر</h2>
+            <table>
+                <tr><th>اليوم</th><th>الوقت</th><th>الجلسة</th><th>المتحدث</th></tr>
+                <tr><td>الأول</td><td>10-11</td><td>الافتتاح</td><td>رئيس المؤتمر</td></tr>
+                <tr><td>الأول</td><td>11-13</td><td>الكيمياء الخضراء</td><td>د. مثال</td></tr>
+            </table>
+        </div>
+
     </div>
 
-    <div class="icon-card" onclick="showSection('schedule')">
-      <div class="icon-emoji">📅</div>
-      <strong>جدول المؤتمر</strong><br>
-      <small>عرض الجلسات والمحاور</small>
-    </div>
-  </div>
-
-  <!-- قسم تسجيل الحضور -->
-  <div id="attendance" class="section">
-    <h2>تسجيل الحضور</h2>
-    <div class="form-row">
-      <label>الاسم</label>
-      <input type="text" id="name" placeholder="اكتب اسمك">
-    </div>
-    <div class="form-row">
-      <label>الجامعة</label>
-      <input type="text" id="university" placeholder="اسم الجامعة">
-    </div>
-    <div class="form-row">
-      <label>البريد الإلكتروني</label>
-      <input type="email" id="email" placeholder="example@mail.com">
-    </div>
-    <button onclick="registerAttendance()">تسجيل</button>
-    <div id="regMsg"></div>
-  </div>
-
-  <!-- قسم الأفاتار -->
-  <div id="avatar" class="section">
-    <h2>أفاتار المؤتمر</h2>
-    <div class="avatar-card">
-      <div class="avatar-face">
-        <img src="avatar.jpg" style="width:100%;height:100%;">
-      </div>
-      <div>
-        <strong>أستاذ الكيمياء الافتراضي</strong><br>
-        <small id="avatarStatus">اسألني عن المؤتمر…</small>
-      </div>
-    </div>
-
-    <div class="chat-log" id="chatLog"></div>
-
-    <input id="question" type="text" placeholder="اكتب سؤالك هنا…" style="width:80%;padding:8px;border-radius:8px;">
-    <button onclick="askAvatar()">إرسال</button>
-  </div>
-
-  <!-- جدول المؤتمر -->
-  <div id="schedule" class="section">
-    <h2>جدول المؤتمر</h2>
-    <table>
-      <tr><th>اليوم</th><th>الوقت</th><th>الجلسة</th><th>المتحدث</th></tr>
-      <tr><td>اليوم الأول</td><td>10:00</td><td>الافتتاحية</td><td>رئيس المؤتمر</td></tr>
-    </table>
-  </div>
-
-</div>
-
-<script>
-function showSection(id) {
-  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-}
-showSection('attendance');
-</script>
+    <script>
+        function showSection(id){
+            document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
+            document.getElementById(id).classList.add("active");
+        }
+    </script>
 
 </body>
 </html>
