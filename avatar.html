@@ -1,165 +1,182 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar">
 <head>
-<meta charset="UTF-8">
-<title>Conference Avatar Assistant</title>
+  <meta charset="UTF-8">
+  <title>أفاتار المؤتمر – Chemistry SSC2 2026</title>
 
-<style>
+  <style>
     body {
-        background: #000814;
-        color: #fff;
-        font-family: Tahoma, Arial;
-        text-align: center;
-        margin: 0;
+      margin: 0;
+      font-family: Tahoma, Arial, sans-serif;
+      direction: rtl;
+      background: #020617;
+      color: #e5e7eb;
+      text-align: center;
+      padding: 20px;
     }
 
-    h1 {
-        margin-top: 20px;
-        font-size: 26px;
+    .avatar-box {
+      width: 200px;
+      height: 200px;
+      margin: 20px auto;
+      border-radius: 50%;
+      background: #0f172a;
+      border: 3px solid #22c55e;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 90px;
+      animation: pulse 2s infinite;
     }
 
-    #avatar-container {
-        width: 100%;
-        height: 420px;
-        background: #001d3d;
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.08); }
+      100% { transform: scale(1); }
     }
 
-    #chat-area {
-        width: 80%;
-        margin: 20px auto;
-        padding: 15px;
-        background: #001021;
-        border-radius: 12px;
-        height: 260px;
-        overflow-y: auto;
-        text-align: left;
-    }
-
-    .bubble {
-        padding: 12px;
-        margin-bottom: 12px;
-        border-radius: 12px;
-        max-width: 80%;
-    }
-
-    .q {
-        background: #003566;
-        color: #fca311;
-        align-self: flex-start;
-    }
-
-    .a {
-        background: #001d3d;
-        color: #80ed99;
-        align-self: flex-end;
-    }
-
-    #controls {
-        margin-top: 15px;
+    .box {
+      width: 90%;
+      max-width: 700px;
+      margin: 20px auto;
+      background: #0f172a;
+      padding: 15px;
+      border-radius: 15px;
+      border: 1px solid #1e293b;
+      text-align: right;
     }
 
     input {
-        width: 50%;
-        padding: 10px;
-        border-radius: 10px;
-        border: none;
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      border: none;
+      margin-top: 10px;
+      font-size: 16px;
     }
 
     button {
-        padding: 10px 15px;
-        margin-right: 10px;
-        border-radius: 10px;
-        border: none;
-        cursor: pointer;
+      margin-top: 10px;
+      padding: 10px 20px;
+      border-radius: 8px;
+      background: #22c55e;
+      border: none;
+      color: #000;
+      font-weight: bold;
+      cursor: pointer;
     }
 
-    .send-btn { background: #00b4d8; color: white; }
-    .voice-btn { background: #fca311; }
-    .back-btn  { background: #94d2bd; margin-top: 15px; }
-</style>
-
-<script src="https://unpkg.com/@readyplayerme/visage@latest"></script>
+    audio {
+      margin-top: 10px;
+      width: 100%;
+    }
+  </style>
 
 </head>
+
 <body>
 
-<h1>🤖 Intelligent Avatar – Chemistry Conference</h1>
+  <h1>أفاتار المؤتمر – المساعد الافتراضي</h1>
 
-<div id="avatar-container"></div>
+  <!-- الأفاتار المتحرك -->
+  <div class="avatar-box">👨‍🔬</div>
 
-<div id="chat-area"></div>
+  <!-- إدخال السؤال -->
+  <div class="box">
+    <label>اكتب سؤالك بالعربية:</label>
+    <input id="question" type="text" placeholder="مثال: ما أهداف المؤتمر؟">
+    <button onclick="ask()">إرسال</button>
 
-<div id="controls">
-    <input id="question" placeholder="Type your question...">
-    <button class="send-btn" onclick="askBot()">Send</button>
-    <button class="voice-btn" onclick="speakNow()">🎤 Voice Question</button>
-</div>
+    <br><br>
 
-<button class="back-btn" onclick="window.location.href='index.html'">Back</button>
+    <button onclick="startRecording()">🎤 اسأل صوتياً</button>
+    <button onclick="stopRecording()">⏹ إيقاف</button>
 
-<script>
-const avatarUrl = "https://models.readyplayer.me/65a7a4a3758e2d309f32e3d4.glb";
+    <audio id="audioPlayer" controls></audio>
+  </div>
 
-const viewer = new window.RPMVisage.AvatarScene({
-    container: document.getElementById("avatar-container"),
-    avatarUrl: avatarUrl,
-    idleAnimation: true,
-    autoRotate: true,
-    lipsync: true,
-});
+  <!-- عرض النتائج -->
+  <div class="box">
+    <h3>السؤال (بالإنجليزية):</h3>
+    <div id="q_en" style="color:#38bdf8"></div>
 
-function addBubble(text, type) {
-    let div = document.createElement("div");
-    div.className = "bubble " + (type === "q" ? "q" : "a");
-    div.innerHTML = text;
-    document.getElementById("chat-area").appendChild(div);
-    document.getElementById("chat-area").scrollTop = 999999;
-}
+    <h3>الإجابة (بالعربية):</h3>
+    <div id="a_ar" style="color:#a5b4fc"></div>
 
-async function askBot() {
-    let q = document.getElementById("question").value.trim();
-    if (!q) return;
+    <h3>الإجابة (بالإنجليزية):</h3>
+    <div id="a_en" style="color:#fbbf24"></div>
+  </div>
 
-    addBubble("Question: " + q, "q");
 
-    viewer.playTalkingAnimation();
+  <script>
+    // ----------------------------
+    // إرسال سؤال نصي
+    // ----------------------------
+    async function ask() {
+      const question = document.getElementById("question").value.trim();
+      if (!question) return;
 
-    const res = await fetch("/ask", {
+      const res = await fetch("/ask", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ question: q })
-    });
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({ question })
+      });
 
-    const data = await res.json();
+      const data = await res.json();
 
-    addBubble("EN Answer: " + data.answer_en, "a");
+      // عرض النصوص
+      document.getElementById("q_en").textContent = data.question_en;
+      document.getElementById("a_ar").textContent = data.answer_ar;
+      document.getElementById("a_en").textContent = data.answer_en;
 
-    if (data.voice) {
-        let audio = new Audio("data:audio/wav;base64," + data.voice);
+      // تشغيل الصوت
+      if (data.voice) {
+        const audio = document.getElementById("audioPlayer");
+        audio.src = "data:audio/wav;base64," + data.voice;
         audio.play();
-        audio.onended = () => viewer.stopTalkingAnimation();
+      }
     }
 
-    document.getElementById("question").value = "";
-}
+    // ----------------------------
+    // تسجيل الصوت STT
+    // ----------------------------
+    let mediaRecorder;
+    let audioChunks = [];
 
-function speakNow() {
-    if (!("webkitSpeechRecognition" in window)) {
-        alert("Voice input not supported");
-        return;
+    async function startRecording() {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      mediaRecorder = new MediaRecorder(stream);
+
+      audioChunks = [];
+
+      mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+
+      mediaRecorder.onstop = async () => {
+        const blob = new Blob(audioChunks, { type: "audio/webm" });
+        const formData = new FormData();
+        formData.append("audio", blob, "speech.webm");
+
+        const res = await fetch("/stt", {
+          method: "POST",
+          body: formData
+        });
+
+        const data = await res.json();
+        document.getElementById("question").value = data.text;
+      };
+
+      mediaRecorder.start();
+      alert("🎙 بدأ التسجيل...");
     }
 
-    let rec = new webkitSpeechRecognition();
-    rec.lang = "ar-SA";
+    function stopRecording() {
+      if (mediaRecorder) {
+        mediaRecorder.stop();
+        alert("⏹ تم إيقاف التسجيل");
+      }
+    }
 
-    rec.onresult = ev => {
-        document.getElementById("question").value = ev.results[0][0].transcript;
-        askBot();
-    };
-
-    rec.start();
-}
-</script>
+  </script>
 
 </body>
 </html>
