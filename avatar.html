@@ -1,59 +1,199 @@
-<script>
-  // رابط موديل الروبوت الجاهز
-  const avatarUrl = "https://models.readyplayer.me/65a7a4a3758e2d309f32e3d4.glb"; 
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8" />
+  <title>أفاتار المؤتمر – المساعد الذكي</title>
 
-  // عرض الأفاتار داخل الصندوق
-  const container = document.getElementById("avatar-container");
-
-  const viewer = new window.RPMVisage.AvatarScene({
-    container: container,
-    avatarUrl: avatarUrl,
-    idleAnimation: true,
-    autoRotate: true,
-    lipsync: true,
-  });
-
-  // وظيفة الكلام
-  function speak(text) {
-    const synth = window.speechSynthesis;
-    const utter = new SpeechSynthesisUtterance(text);
-    utter.lang = "ar-SA";
-    utter.rate = 1.05;
-    utter.pitch = 1.0;
-    synth.speak(utter);
-  }
-
-  // إرسال السؤال إلى السيرفر واستلام الإجابة
-  async function askBot() {
-    const input = document.getElementById("question");
-    const q = input.value.trim();
-    if (!q) return;
-
-    // تشغيل حركة الفم
-    viewer.playTalkingAnimation();
-
-    let answer = "لم أتمكن من الحصول على الإجابة.";
-
-    try {
-      const res = await fetch("/ask", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ question: q })
-      });
-
-      const data = await res.json();
-      answer = data.answer_ar || "لم أجد إجابة في ملف المؤتمر.";
-
-    } catch (err) {
-      answer = "حدث خطأ في الاتصال بالخادم.";
+  <style>
+    body {
+      margin: 0;
+      background: #000814;
+      color: white;
+      font-family: Tahoma, Arial;
+      direction: rtl;
+      text-align: center;
     }
 
-    // نطق الإجابة
-    speak(answer);
+    h1 {
+      margin-top: 20px;
+      font-size: 26px;
+    }
 
-    // إيقاف حركة الفم بعد انتهاء الكلام
-    setTimeout(() => viewer.stopTalkingAnimation(), answer.length * 85);
+    #avatar-container {
+      width: 100%;
+      height: 450px;
+      background: #001d3d;
+      border-top: 2px solid #003566;
+      border-bottom: 2px solid #003566;
+      margin-top: 20px;
+    }
 
-    input.value = "";
-  }
-</script>
+    #question-box {
+      margin-top: 20px;
+    }
+
+    input {
+      width: 60%;
+      padding: 12px;
+      border-radius: 10px;
+      border: none;
+      font-size: 18px;
+    }
+
+    button {
+      padding: 12px 20px;
+      font-size: 18px;
+      border-radius: 10px;
+      border: none;
+      background: #00b4d8;
+      color: white;
+      cursor: pointer;
+      margin-right: 10px;
+    }
+
+    .chat-log {
+      width: 80%;
+      margin: 20px auto;
+      background: #001021;
+      padding: 15px;
+      border-radius: 12px;
+      text-align: right;
+    }
+
+    .chat-item {
+      margin-bottom: 15px;
+      padding: 10px;
+      background: #001d3d;
+      border-radius: 10px;
+    }
+
+    .english {
+      color: #fca311;
+      font-size: 15px;
+      margin-bottom: 5px;
+    }
+
+    .back-btn {
+      margin-top: 20px;
+      background: #94d2bd;
+      color: #000;
+    }
+  </style>
+
+  <!-- ReadyPlayerMe Avatar Renderer -->
+  <script src="https://unpkg.com/@readyplayerme/visage@latest"></script>
+</head>
+
+<body>
+
+  <h1>🤖 أفاتار المؤتمر – المساعد الذكي</h1>
+
+  <div id="avatar-container"></div>
+
+  <div id="question-box">
+    <input type="text" id="question" placeholder="اكتب سؤالك هنا..." />
+    <button onclick="askBot()">إرسال</button>
+    <button onclick="startListening()">🎤 اسأل صوتياً</button>
+  </div>
+
+  <!-- منطقة عرض السؤال والجواب -->
+  <div id="chatLog" class="chat-log"></div>
+
+  <button class="back-btn" onclick="window.location.href='index.html'">العودة</button>
+
+  <script>
+    const avatarUrl = "https://models.readyplayer.me/65a7a4a3758e2d309f32e3d4.glb";
+
+    const container = document.getElementById("avatar-container");
+    const chatLog = document.getElementById("chatLog");
+
+    const viewer = new window.RPMVisage.AvatarScene({
+      container: container,
+      avatarUrl: avatarUrl,
+      idleAnimation: true,
+      autoRotate: true,
+      lipsync: true,
+    });
+
+    // نطق عربي
+    function speak(text) {
+      const synth = window.speechSynthesis;
+      const utter = new SpeechSynthesisUtterance(text);
+      utter.lang = "ar-SA";
+      utter.rate = 1.05;
+      synth.speak(utter);
+    }
+
+    // عرض EN فقط
+    function addChat(questionEn, answerEn) {
+      const item = document.createElement("div");
+      item.className = "chat-item";
+
+      item.innerHTML = `
+        <div class="english"><strong>Question:</strong> ${questionEn}</div>
+        <div class="english"><strong>Answer:</strong> ${answerEn}</div>
+      `;
+
+      chatLog.prepend(item);
+    }
+
+    // إرسال للسيرفر
+    async function askBot() {
+      const q = document.getElementById("question").value.trim();
+      if (!q) return;
+
+      viewer.playTalkingAnimation();
+
+      let answerAr = "";
+      let answerEn = "";
+      let questionEn = "";
+
+      try {
+        const res = await fetch("/ask", {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({ question: q })
+        });
+
+        const data = await res.json();
+        answerAr = data.answer_ar;
+        answerEn = data.answer_en;
+        questionEn = data.question_en;
+
+      } catch {
+        answerAr = "حدث خطأ.";
+        answerEn = "Server error.";
+        questionEn = "Error.";
+      }
+
+      addChat(questionEn, answerEn);
+      speak(answerAr);
+
+      setTimeout(() => viewer.stopTalkingAnimation(), answerAr.length * 85);
+
+      document.getElementById("question").value = "";
+    }
+
+    // الاستقبال الصوتي
+    function startListening() {
+      if (!("webkitSpeechRecognition" in window)) {
+        alert("متصفحك لا يدعم التعرف الصوتي.");
+        return;
+      }
+
+      const rec = new webkitSpeechRecognition();
+      rec.lang = "ar-SA";
+      rec.interimResults = false;
+
+      rec.onresult = function(event) {
+        const speech = event.results[0][0].transcript;
+        document.getElementById("question").value = speech;
+        askBot();
+      };
+
+      rec.start();
+    }
+  </script>
+
+</body>
+</html>
