@@ -2,274 +2,111 @@
 <html lang="ar">
 <head>
   <meta charset="UTF-8" />
-  <title>بوابة المؤتمر العلمي للكيمياء</title>
+  <title>أفاتار المؤتمر – روبوت مساعد</title>
 
   <style>
     body {
       margin: 0;
-      font-family: Tahoma, Arial, sans-serif;
-      direction: rtl;
-      background: #020617;
-      color: #e5e7eb;
-    }
-
-    .top-header {
-      display: flex;
-      align-items: center;
-      gap: 15px;
-      padding: 10px 20px;
-      background: #020617;
-      border-bottom: 1px solid #1e293b;
-      position: sticky;
-      top: 0;
-      z-index: 1000;
-    }
-    .top-header img {
-      height: 60px;
-      border-radius: 10px;
-    }
-    .title-block { display: flex; flex-direction: column; }
-    .main-title { font-size: 18px; font-weight: bold; color: #fff; }
-    .sub-title { font-size: 12px; color: #94a3b8; }
-
-    .container {
-      max-width: 960px;
-      margin: 0 auto;
-      padding: 20px;
-    }
-
-    .icon-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 16px;
-      justify-content: center;
-      margin-bottom: 30px;
-    }
-
-    .icon-card {
-      background: #0f172a;
-      border-radius: 16px;
-      padding: 16px;
-      width: 260px;
+      background: #000814;
+      color: white;
+      font-family: Tahoma;
       text-align: center;
-      cursor: pointer;
-      box-shadow: 0 15px 30px rgba(0,0,0,0.4);
-      transition: 0.2s;
-    }
-    .icon-card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 20px 40px rgba(0,0,0,0.6);
     }
 
-    .icon-emoji { font-size: 40px; margin-bottom: 8px; }
-
-    .section {
-      display: none;
-      background: #020617;
-      padding: 16px;
-      border-radius: 16px;
-      border: 1px solid #1f2937;
-      margin-bottom: 30px;
+    h1 {
+      margin-top: 20px;
     }
-    .section.active { display: block; }
 
-    /* نموذج الحضور */
-    input[type="text"], input[type="email"] {
+    #avatar-container {
       width: 100%;
-      padding: 8px;
-      border-radius: 8px;
-      border: none;
-      outline: none;
-      font-size: 14px;
+      height: 500px;
+      background: #001d3d;
+      border-top: 2px solid #003566;
+      border-bottom: 2px solid #003566;
     }
+
+    #question-box {
+      margin-top: 25px;
+    }
+
+    input {
+      width: 60%;
+      padding: 12px;
+      border-radius: 10px;
+      border: none;
+      font-size: 18px;
+    }
+
     button {
-      padding: 8px 16px;
-      border-radius: 8px;
-      border: none;
-      background: #22c55e;
-      color: #020617;
-      font-weight: bold;
-      cursor: pointer;
-      margin-top: 8px;
-    }
-
-    .msg { font-size: 14px; margin-top: 10px; }
-    .msg.ok { color: #4ade80; }
-    .msg.err { color: #f87171; }
-
-    /* أفاتار متحرك */
-    .avatar-card {
-      display: flex;
-      gap: 20px;
-      align-items: center;
-      margin-bottom: 20px;
-    }
-
-    .avatar-anim {
-      width: 130px;
-      height: 130px;
-      border-radius: 50%;
-      border: 3px solid #22c55e;
-      object-fit: cover;
-      background: #0b1120;
-    }
-
-    .status { color: #9ca3af; font-size: 14px; }
-
-    .chat-log {
-      background: #0f172a;
-      height: 220px;
-      overflow-y: auto;
+      padding: 12px 20px;
+      font-size: 18px;
       border-radius: 10px;
-      padding: 10px;
-      border: 1px solid #1e293b;
-      margin-bottom: 15px;
+      border: none;
+      background: #00b4d8;
+      color: white;
+      cursor: pointer;
+      margin-right: 10px;
     }
-
-    .msg-user { color: #38bdf8; margin-bottom: 4px; }
-    .msg-bot-ar { color: #a5b4fc; margin-bottom: 2px; }
-    .msg-bot-en { color: #fbbf24; margin-bottom: 8px; }
-
-    .chat-input-row {
-      display: flex;
-      gap: 8px;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 15px;
-    }
-    th, td {
-      padding: 8px;
-      border: 1px solid #1f2937;
-      text-align: center;
-    }
-    th { background: #111827; }
   </style>
+
+  <!-- مكتبة ReadyPlayerMe Avatar Renderer -->
+  <script src="https://unpkg.com/@readyplayerme/visage@latest"></script>
 </head>
 
 <body>
 
-  <!-- الهيدر + الشعار -->
-  <div class="top-header">
-    <img src="logo.jpg" alt="شعار المؤتمر">
-    <div class="title-block">
-      <div class="main-title">Chemistry Horizons – SSC2 2026</div>
-      <div class="sub-title">Jerash University • Second Scientific Conference in Chemistry</div>
-    </div>
+  <h1>🤖 أفاتار المؤتمر – المساعد الذكي</h1>
+  <p>روبوت متحرك يجيب على أسئلتك</p>
+
+  <!-- صندوق عرض الأفاتار -->
+  <div id="avatar-container"></div>
+
+  <!-- صندوق الأسئلة -->
+  <div id="question-box">
+    <input type="text" id="question" placeholder="اكتب سؤالك هنا..." />
+    <button onclick="askBot()">إرسال</button>
   </div>
 
-  <div class="container">
+  <script>
+    // تحميل روبوت جاهز من ReadyPlayerMe
+    const avatarUrl = "https://models.readyplayer.me/65a7a4a3758e2d309f32e3d4.glb"; 
+    // (هذا روبوت افتراضي جاهز — متحرك بالكامل)
 
-    <!-- أيقونات -->
-    <div class="icon-row">
-      <div class="icon-card" onclick="showSection('attendance')">
-        <div class="icon-emoji">📝</div>
-        <strong>تسجيل الحضور</strong>
-        <div style="color:#94a3b8;font-size:13px;">الإسم – الجامعة – البريد الإلكتروني</div>
-      </div>
+    // عرض الأفاتار داخل الـ container
+    const container = document.getElementById("avatar-container");
 
-      <div class="icon-card" onclick="showSection('avatar')">
-        <div class="icon-emoji">🤖</div>
-        <strong>أفاتار المؤتمر</strong>
-        <div style="color:#94a3b8;font-size:13px;">يتحدث العربية + ترجمة إنجليزية</div>
-      </div>
+    const viewer = new window.RPMVisage.AvatarScene({
+      container: container,
+      avatarUrl: avatarUrl,
+      idleAnimation: true,
+      autoRotate: true,
+      lipsync: true,
+    });
 
-      <div class="icon-card" onclick="showSection('schedule')">
-        <div class="icon-emoji">📅</div>
-        <strong>جدول المؤتمر</strong>
-        <div style="color:#94a3b8;font-size:13px;">عرض الجلسات والمحاور</div>
-      </div>
-    </div>
+    // وظيفة التحدث
+    function speak(text) {
+      const synth = window.speechSynthesis;
+      const utter = new SpeechSynthesisUtterance(text);
+      utter.lang = "ar-SA";
+      synth.speak(utter);
+    }
 
-    <!-- قسم الحضور -->
-    <div id="attendance" class="section">
-      <h2>تسجيل الحضور</h2>
+    // الرد على المستخدم
+    function askBot() {
+      const q = document.getElementById("question").value.trim();
+      if (!q) return;
 
-      <label>الاسم الكامل</label>
-      <input id="name" type="text" placeholder="اكتب اسمك">
+      // تشغيل أنيميشن الفم
+      viewer.playTalkingAnimation();
 
-      <label>الجامعة</label>
-      <input id="university" type="text" placeholder="اسم الجامعة">
+      // الرد الافتراضي (يمكن ربطه بالخادم لاحقًا)
+      let answer = "شكراً على سؤالك! سيتم الإجابة بشكل دقيق من خلال قاعدة البيانات.";
 
-      <label>البريد الإلكتروني</label>
-      <input id="email" type="email" placeholder="example@domain.com">
+      speak(answer);
 
-      <button onclick="registerAttendance()">تسجيل</button>
-      <div id="regMsg" class="msg"></div>
-    </div>
-
-    <!-- قسم الأفاتار -->
-    <div id="avatar" class="section">
-      <h2>أفاتار المؤتمر</h2>
-
-      <div class="avatar-card">
-        <img src="https://media.tenor.com/p5J7G-TQHyMAAAAd/scientist-lab.gif" class="avatar-anim">
-        <div>
-          <strong>أستاذ الكيمياء الافتراضي</strong>
-          <div class="status" id="avatarStatus">اسألني عن أي شيء في المؤتمر…</div>
-        </div>
-      </div>
-
-      <div id="chatLog" class="chat-log"></div>
-
-      <div class="chat-input-row">
-        <input id="question" type="text" placeholder="اكتب سؤالك…">
-        <button onclick="askAvatar()">إرسال</button>
-      </div>
-    </div>
-
-    <!-- جدول المؤتمر -->
-    <div id="schedule" class="section">
-      <h2>جدول المؤتمر</h2>
-
-      <table>
-        <thead>
-          <tr>
-            <th>اليوم</th><th>الوقت</th><th>الجلسة</th><th>المتحدث</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr><td>اليوم الأول</td><td>10:00 - 11:00</td><td>الجلسة الافتتاحية</td><td>رئيس المؤتمر</td></tr>
-          <tr><td>اليوم الأول</td><td>11:30 - 13:00</td><td>آفاق الكيمياء الخضراء</td><td>د. مثال</td></tr>
-          <tr><td>اليوم الثاني</td><td>10:00 - 11:30</td><td>التطبيقات الصناعية</td><td>د. مثال</td></tr>
-        </tbody>
-      </table>
-    </div>
-
-  </div>
-
-<script>
-function showSection(id) {
-  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-}
-
-showSection('attendance');
-
-async function registerAttendance() {
-  const name = nameEl.value;
-  const university = universityEl.value;
-  const email = emailEl.value;
-}
-
-function addMsg(text, type) {
-  const p = document.createElement("p");
-  p.textContent = text;
-  p.className = type;
-  chatLog.appendChild(p);
-  chatLog.scrollTop = chatLog.scrollHeight;
-}
-
-async function askAvatar() {
-  const q = question.value.trim();
-  if (!q) return;
-
-  addMsg("👤 أنت: " + q, "msg-user");
-  question.value = "";
-}
-</script>
+      setTimeout(() => viewer.stopTalkingAnimation(), answer.length * 80);
+    }
+  </script>
 
 </body>
 </html>
