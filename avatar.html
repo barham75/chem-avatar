@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8" />
+  <title>أفاتار المؤتمر – المساعد الذكي</title>
+
+  <style>
+    body {
+      margin: 0;
+      background: #000814;
+      color: white;
+      font-family: Tahoma, Arial;
+      direction: rtl;
+      text-align: center;
+    }
+
+    h1 {
+      margin-top: 20px;
+      font-size: 26px;
+    }
+
+    #avatar-container {
+      width: 100%;
+      height: 500px;
+      background: #001d3d;
+      border-top: 2px solid #003566;
+      border-bottom: 2px solid #003566;
+      margin-top: 20px;
+    }
+
+    #question-box {
+      margin-top: 25px;
+    }
+
+    input {
+      width: 60%;
+      padding: 12px;
+      border-radius: 10px;
+      border: none;
+      font-size: 18px;
+    }
+
+    button {
+      padding: 12px 20px;
+      font-size: 18px;
+      border-radius: 10px;
+      border: none;
+      background: #00b4d8;
+      color: white;
+      cursor: pointer;
+      margin-right: 10px;
+    }
+
+    .back-btn {
+      margin-top: 20px;
+      background: #94d2bd;
+      color: #000;
+    }
+  </style>
+
+  <!-- مكتبة ReadyPlayerMe Avatar Renderer -->
+  <script src="https://unpkg.com/@readyplayerme/visage@latest"></script>
+</head>
+
+<body>
+
+  <h1>🤖 أفاتار المؤتمر – المساعد الذكي</h1>
+  <p>روبوت متحرك يجيب على أسئلتك</p>
+
+  <!-- صندوق عرض الأفاتار -->
+  <div id="avatar-container"></div>
+
+  <!-- صندوق الأسئلة -->
+  <div id="question-box">
+    <input type="text" id="question" placeholder="اكتب سؤالك هنا..." />
+    <button onclick="askBot()">إرسال</button>
+  </div>
+
+  <button class="back-btn" onclick="window.location.href='index.html'">
+    العودة إلى الصفحة الرئيسية
+  </button>
+
+  <script>
+    // رابط موديل الروبوت الجاهز (لا يحتاج رفع ملف)
+    const avatarUrl = "https://models.readyplayer.me/65a7a4a3758e2d309f32e3d4.glb"; 
+
+    // عرض الأفاتار داخل الصندوق
+    const container = document.getElementById("avatar-container");
+
+    const viewer = new window.RPMVisage.AvatarScene({
+      container: container,
+      avatarUrl: avatarUrl,
+      idleAnimation: true,
+      autoRotate: true,
+      lipsync: true,
+    });
+
+    // وظيفة الكلام
+    function speak(text) {
+      const synth = window.speechSynthesis;
+      const utter = new SpeechSynthesisUtterance(text);
+      utter.lang = "ar-SA";
+      synth.speak(utter);
+    }
+
+    // الرد على المستخدم
+    async function askBot() {
+      const q = document.getElementById("question").value.trim();
+      if (!q) return;
+
+      // تشغيل انيميشن الفم
+      viewer.playTalkingAnimation();
+
+      // الرد الافتراضي
+      let answer = "شكراً على سؤالك! سيتم الإجابة بشكل دقيق من خلال قاعدة بيانات المؤتمر.";
+
+      // التحدث
+      speak(answer);
+
+      // إيقاف تحريك الفم بعد انتهاء الكلام
+      setTimeout(() => viewer.stopTalkingAnimation(), answer.length * 100);
+
+      // مسح السؤال
+      document.getElementById("question").value = "";
+    }
+  </script>
+
+</body>
+</html>
