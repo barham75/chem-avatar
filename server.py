@@ -3,13 +3,21 @@ from flask_cors import CORS
 import openpyxl
 from docx import Document
 import os
+import openai
+import base64
 
 app = Flask(__name__)
 CORS(app)
 
-# ----------------------------------------
-# 1) قراءة ملف Word وتحويله إلى قاعدة معرفة
-# ----------------------------------------
+# ------------------------------------------------
+# 1) ضع مفتاح OpenAI API هنا (لا تكتبه كاملاً لأي أحد)
+# ------------------------------------------------
+openai.api_key = "YOUR_API_KEY_HERE"
+
+
+# ------------------------------------------------
+# 2) قراءة ملف Word واستخراج Q/A
+# ------------------------------------------------
 
 DOCX_PATH = "kb.docx"
 
@@ -26,11 +34,9 @@ def load_docx_text():
         if not text:
             continue
 
-        # السؤال
         if text.startswith("Q:") or text.startswith("س:"):
             last_q = text[2:].strip()
             qa[last_q] = ""
-        # الجواب
         elif text.startswith("A:") or text.startswith("ج:"):
             if last_q:
                 qa[last_q] = text[2:].strip()
@@ -46,42 +52,48 @@ def best_match(question):
             return knowledge_base[key]
     return "لم أجد إجابة مناسبة في ملف المؤتمر."
 
-# ----------------------------------------
-# 2) ترجمة بسيطة للإنجليزية
-# ----------------------------------------
+
+# ------------------------------------------------
+# 3) ترجمة احترافية باستخدام OpenAI
+# ------------------------------------------------
 
 def translate_to_english(text):
-    dictionary = {
-        "هدف المؤتمر": "The goal of the conference",
-        "تعزيز البحث العلمي": "To promote scientific research",
-        "مكان المؤتمر": "The conference venue",
-        "المتحدثون": "The keynote speakers",
-        "محاور المؤتمر": "The conference topics",
-        "جامعة": "University",
-        "افتتاح": "Opening ceremony",
-        "بحث": "Research",
-        "كيمياء": "Chemistry",
-    }
-    for ar, en in dictionary.items():
-        if ar in text:
-            return en
-    return "No English translation available."
+    try:
+        response = openai.ChatCompletion.create(
+            model="gpt-4o-mini",
+            messages=[
+                {"role": "system", "content": "Translate Arabic to formal academic English."},
+                {"role": "user", "content": text}
+            ]
+        )
+        return response["choices"][0]["message"]["content"].strip()
+    except:
+        return "No English translation available."
 
-# ----------------------------------------
-# 3) مسارات الصفحات
-# ----------------------------------------
 
-@app.route("/")
-def index():
-    return send_from_directory(".", "index.html")
+# ------------------------------------------------
+# 4) توليد الصوت العربي الأردني (TTS)
+# ------------------------------------------------
 
-@app.route("/<path:path>")
-def static_files(path):
-    return send_from_directory(".", path)
+def generate_arabic_voice(text):
+    try:
+        response = openai.Audio.create(
+            model="gpt-4o-mini-tts",
+            voice="omar",
+            input=f"اقرأ النص باللهجة الأردنية، بأسلوب محاضر جامعي بعمر 50 سنة، وبسرعة بطيئة قليلاً: {text}",
+            format="wav"
+        )
+        audio_bytes = response["audio"]
+        audio_base64 = base64.b64encode(audio_bytes).decode("utf-8")
+        return audio_base64
+    except Exception as e:
+        print("TTS ERROR:", e)
+        return None
 
-# ----------------------------------------
-# 4) API سؤال الأفاتار
-# ----------------------------------------
+
+# ------------------------------------------------
+# 5) API سؤال الأفاتار
+# ------------------------------------------------
 
 @app.route("/ask", methods=["POST"])
 def ask():
@@ -91,19 +103,36 @@ def ask():
     # الجواب العربي
     answer_ar = best_match(question_ar)
 
-    # ترجمة السؤال والجواب
-    question_en = translate_to_english(question_ar)
+    # الترجمة
     answer_en = translate_to_english(answer_ar)
+    question_en = translate_to_english(question_ar)
+
+    # الصوت
+    voice_b64 = generate_arabic_voice(answer_ar)
 
     return jsonify({
         "question_en": question_en,
         "answer_en": answer_en,
-        "answer_ar": answer_ar
+        "voice": voice_b64
     })
 
-# ----------------------------------------
-# تشغيل السيرفر
-# ----------------------------------------
+
+# ------------------------------------------------
+# 6) رفع الصفحات الثابتة
+# ------------------------------------------------
+
+@app.route("/")
+def index():
+    return send_from_directory(".", "index.html")
+
+@app.route("/<path:path>")
+def static_files(path):
+    return send_from_directory(".", path)
+
+
+# ------------------------------------------------
+# 7) تشغيل السيرفر
+# ------------------------------------------------
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
