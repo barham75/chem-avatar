@@ -1,101 +1,125 @@
 from flask import Flask, request, jsonify, send_from_directory
+from flask_cors import CORS
+import openpyxl
 from docx import Document
-import difflib
 import os
-import pandas as pd
 
 app = Flask(__name__)
+CORS(app)
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+# -------------------------------
+# 1) تحميل قاعدة المعرفة من ملف Word
+# -------------------------------
+DOCX_PATH = "kb.docx"
 
-# مسارات الملفات
-DOCX_PATH = os.path.join(BASE_DIR, "kb.docx")         # ملف الوورد
-EXCEL_PATH = os.path.join(BASE_DIR, "attendees.xlsx") # ملف الحضور
-
-# تحميل محتوى الوورد (عربي + إنجليزي في أزواج)
-def load_docx_pairs():
+def load_docx_text():
+    if not os.path.exists(DOCX_PATH):
+        return {}
     doc = Document(DOCX_PATH)
-    paras = [p.text.strip() for p in doc.paragraphs if p.text.strip()]
-    arabic_list = []
-    english_list = []
+    qa = {}
+    last_q = None
 
-    # نفترض: فقرة عربية ثم التي بعدها إنجليزية
-    i = 0
-    while i < len(paras):
-        ar = paras[i]
-        en = ""
-        if i + 1 < len(paras):
-            en = paras[i + 1]
-        arabic_list.append(ar)
-        english_list.append(en)
-        i += 2
+    for para in doc.paragraphs:
+        text = para.text.strip()
+        if not text:
+            continue
 
-    return arabic_list, english_list
+        if text.startswith("Q:") or text.startswith("س:"):
+            last_q = text[2:].strip()
+            qa[last_q] = ""
+        elif text.startswith("A:") or text.startswith("ج:"):
+            if last_q:
+                qa[last_q] = text[2:].strip()
 
-arabic_paras, english_paras = load_docx_pairs()
+    return qa
 
-
-def get_answer_from_docx(user_question: str):
-    """
-    نبحث عن أقرب فقرة عربية للسؤال، ونعيد العربية + الإنجليزية المقابلة.
-    """
-    if not arabic_paras:
-        return "لا توجد بيانات في ملف المؤتمر.", ""
-
-    match = difflib.get_close_matches(user_question, arabic_paras, n=1, cutoff=0.2)
-    if match:
-        idx = arabic_paras.index(match[0])
-        ar = arabic_paras[idx]
-        en = english_paras[idx] if idx < len(english_paras) else ""
-        return ar, en
-    else:
-        return "عذراً، لا أجد معلومة مناسبة لهذا السؤال في ملف المؤتمر.", ""
+knowledge_base = load_docx_text()
 
 
+def best_match(question):
+    """بحث بسيط: يطابق أقرب سؤال من الملف."""
+    question = question.strip().lower()
+    for q in knowledge_base:
+        if question in q.lower() or q.lower() in question:
+            return knowledge_base[q]
+    return "لم أجد إجابة لهذا السؤال في ملف المؤتمر."
+
+
+# -------------------------------
+# 2) صفحة HTML الرئيسية
+# -------------------------------
 @app.route("/")
 def index():
-    return send_from_directory(BASE_DIR, "index.html")
+    return send_from_directory(".", "index.html")
 
 
-@app.route("/ask", methods=["POST"])
-def ask():
-    """
-    نقطة الأفاتار: تستقبل سؤال وترجع إجابة عربية + ترجمة إنجليزية.
-    """
-    data = request.get_json(force=True)
-    user_question = data.get("question", "").strip()
-    if not user_question:
-        return jsonify({"answer_ar": "الرجاء كتابة سؤال.", "answer_en": ""})
-    answer_ar, answer_en = get_answer_from_docx(user_question)
-    return jsonify({"answer_ar": answer_ar, "answer_en": answer_en})
+@app.route("/<path:path>")
+def serve_static(path):
+    """يدعم تحميل الصور والملفات مثل logo.jpg و avatar.png"""
+    return send_from_directory(".", path)
 
+
+# -------------------------------
+# 3) API: تسجيل الحضور
+# -------------------------------
+EXCEL_FILE = "attendees.xlsx"
+
+def init_excel():
+    if not os.path.exists(EXCEL_FILE):
+        wb = openpyxl.Workbook()
+        ws = wb.active
+        ws.append(["الاسم", "الجامعة", "البريد الإلكتروني"])
+        wb.save(EXCEL_FILE)
+
+init_excel()
 
 @app.route("/register", methods=["POST"])
 def register():
-    """
-    تسجيل الحضور: الاسم + الجامعة + الإيميل → إلى ملف attendees.xlsx
-    """
-    data = request.get_json(force=True)
-    name = data.get("name", "").strip()
-    university = data.get("university", "").strip()
-    email = data.get("email", "").strip()
+    data = request.get_json()
+    name = data.get("name", "")
+    university = data.get("university", "")
+    email = data.get("email", "")
 
-    if not name or not university or not email:
-        return jsonify({"ok": False, "message": "الرجاء تعبئة جميع الحقول."})
+    wb = openpyxl.load_workbook(EXCEL_FILE)
+    ws = wb.active
+    ws.append([name, university, email])
+    wb.save(EXCEL_FILE)
 
-    row = {"الاسم": name, "الجامعة": university, "الإيميل": email}
-
-    # إذا الملف موجود: نقرأه ونضيف الصف، إذا لا: ننشئ ملف جديد
-    if os.path.exists(EXCEL_PATH):
-        df = pd.read_excel(EXCEL_PATH)
-        df = pd.concat([df, pd.DataFrame([row])], ignore_index=True)
-    else:
-        df = pd.DataFrame([row])
-
-    df.to_excel(EXCEL_PATH, index=False)
-
-    return jsonify({"ok": True, "message": "تم تسجيل حضورك بنجاح. شكراً لك!"})
+    return jsonify({"ok": True, "message": "تم تسجيل حضورك بنجاح!"})
 
 
+# -------------------------------
+# 4) API: رد الأفاتار
+# -------------------------------
+@app.route("/ask", methods=["POST"])
+def ask():
+    data = request.get_json()
+    question = data.get("question", "")
+
+    answer_ar = best_match(question)
+    answer_en = translate_to_english(answer_ar)
+
+    return jsonify({
+        "answer_ar": answer_ar,
+        "answer_en": answer_en
+    })
+
+
+# ترجمة بسيطة (يمكن تطويرها لاحقًا)
+def translate_to_english(text):
+    manual = {
+        "أهداف المؤتمر": "The goals of the conference",
+        "مكان المؤتمر": "The conference venue",
+        "المتحدثون": "The keynote speakers"
+    }
+    for ar, en in manual.items():
+        if ar in text:
+            return en
+    return "No English translation available."
+
+
+# -------------------------------
+# تشغيل الخادم على Render
+# -------------------------------
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
