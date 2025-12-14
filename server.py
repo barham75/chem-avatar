@@ -40,14 +40,35 @@ def load_docx_text():
 knowledge_base = load_docx_text()
 
 def best_match(question):
-    question = question.strip().lower()
-    for q in knowledge_base:
-        if question in q.lower() or q.lower() in question:
-            return knowledge_base[q]
+    q = question.strip().lower()
+    for key in knowledge_base:
+        if q in key.lower() or key.lower() in q:
+            return knowledge_base[key]
     return "لم أجد إجابة مناسبة في ملف المؤتمر."
 
 # ----------------------------------------
-# 2) صفحة HTML
+# 2) ترجمة بسيطة للإنجليزية
+# ----------------------------------------
+
+def translate_to_english(text):
+    dictionary = {
+        "هدف المؤتمر": "The goal of the conference",
+        "تعزيز البحث العلمي": "To promote scientific research",
+        "مكان المؤتمر": "The conference venue",
+        "المتحدثون": "The keynote speakers",
+        "محاور المؤتمر": "The conference topics",
+        "جامعة": "University",
+        "افتتاح": "Opening ceremony",
+        "بحث": "Research",
+        "كيمياء": "Chemistry",
+    }
+    for ar, en in dictionary.items():
+        if ar in text:
+            return en
+    return "No English translation available."
+
+# ----------------------------------------
+# 3) مسارات الصفحات
 # ----------------------------------------
 
 @app.route("/")
@@ -59,51 +80,29 @@ def static_files(path):
     return send_from_directory(".", path)
 
 # ----------------------------------------
-# 3) API تسجيل الحضور
-# ----------------------------------------
-
-EXCEL_FILE = "attendees.xlsx"
-
-def init_excel():
-    if not os.path.exists(EXCEL_FILE):
-        wb = openpyxl.Workbook()
-        ws = wb.active
-        ws.append(["الاسم", "الجامعة", "البريد الإلكتروني"])
-        wb.save(EXCEL_FILE)
-
-init_excel()
-
-@app.route("/register", methods=["POST"])
-def register():
-    data = request.get_json()
-    name = data.get("name", "")
-    university = data.get("university", "")
-    email = data.get("email", "")
-
-    wb = openpyxl.load_workbook(EXCEL_FILE)
-    ws = wb.active
-    ws.append([name, university, email])
-    wb.save(EXCEL_FILE)
-
-    return jsonify({"ok": True})
-
-# ----------------------------------------
 # 4) API سؤال الأفاتار
 # ----------------------------------------
 
 @app.route("/ask", methods=["POST"])
 def ask():
     data = request.get_json()
-    question = data.get("question", "")
+    question_ar = data.get("question", "")
 
-    answer_ar = best_match(question)
+    # الجواب العربي
+    answer_ar = best_match(question_ar)
+
+    # ترجمة السؤال والجواب
+    question_en = translate_to_english(question_ar)
+    answer_en = translate_to_english(answer_ar)
 
     return jsonify({
-        "answer_ar": answer_ar,
+        "question_en": question_en,
+        "answer_en": answer_en,
+        "answer_ar": answer_ar
     })
 
 # ----------------------------------------
-# تشغيل السيرفر على Render
+# تشغيل السيرفر
 # ----------------------------------------
 
 if __name__ == "__main__":
