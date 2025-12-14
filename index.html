@@ -2,110 +2,305 @@
 <html lang="ar">
 <head>
   <meta charset="UTF-8" />
-  <title>أفاتار المؤتمر – روبوت مساعد</title>
+  <title>بوابة المؤتمر العلمي للكيمياء – SSC2 2026</title>
 
   <style>
     body {
       margin: 0;
-      background: #000814;
-      color: white;
-      font-family: Tahoma;
-      text-align: center;
+      font-family: Tahoma, Arial, sans-serif;
+      direction: rtl;
+      background: #020617;
+      color: #e5e7eb;
+    }
+
+    .top-header {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      padding: 10px 20px;
+      background: #0f172a;
+      border-bottom: 1px solid #1e293b;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+
+    .top-header img {
+      height: 60px;
+      border-radius: 10px;
+    }
+
+    .title-block {
+      display: flex;
+      flex-direction: column;
+      color: #e2e8f0;
+    }
+
+    .main-title {
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    .sub-title {
+      font-size: 13px;
+      color: #94a3b8;
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 20px;
     }
 
     h1 {
-      margin-top: 20px;
+      text-align: center;
+      margin-bottom: 10px;
     }
 
-    #avatar-container {
+    .subtitle {
+      text-align: center;
+      color: #9ca3af;
+      margin-bottom: 30px;
+    }
+
+    .icon-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      justify-content: center;
+      margin-bottom: 30px;
+    }
+
+    .icon-card {
+      background: #0f172a;
+      border-radius: 16px;
+      padding: 16px;
+      width: 260px;
+      text-align: center;
+      cursor: pointer;
+      box-shadow: 0 15px 30px rgba(0,0,0,0.4);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .icon-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+    }
+
+    .icon-emoji {
+      font-size: 40px;
+      margin-bottom: 8px;
+    }
+
+    .section {
+      display: none;
+      background: #020617;
+      padding: 16px;
+      border-radius: 16px;
+      border: 1px solid #1f2937;
+      margin-bottom: 30px;
+    }
+
+    .section.active {
+      display: block;
+    }
+
+    input[type="text"], input[type="email"] {
       width: 100%;
-      height: 500px;
-      background: #001d3d;
-      border-top: 2px solid #003566;
-      border-bottom: 2px solid #003566;
-    }
-
-    #question-box {
-      margin-top: 25px;
-    }
-
-    input {
-      width: 60%;
-      padding: 12px;
-      border-radius: 10px;
+      padding: 8px;
+      border-radius: 8px;
       border: none;
-      font-size: 18px;
+      outline: none;
+      font-size: 14px;
     }
 
     button {
-      padding: 12px 20px;
-      font-size: 18px;
-      border-radius: 10px;
+      padding: 8px 16px;
+      border-radius: 8px;
       border: none;
-      background: #00b4d8;
-      color: white;
+      background: #22c55e;
+      color: #020617;
+      font-weight: bold;
       cursor: pointer;
-      margin-right: 10px;
+      margin-top: 8px;
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: default;
+    }
+
+    .msg {
+      margin-top: 8px;
+      font-size: 14px;
+    }
+
+    .msg.ok { color: #4ade80; }
+    .msg.err { color: #f97373; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+      font-size: 14px;
+    }
+
+    th, td {
+      padding: 8px;
+      border: 1px solid #1f2937;
+      text-align: center;
+    }
+
+    th {
+      background: #111827;
     }
   </style>
 
-  <!-- مكتبة ReadyPlayerMe Avatar Renderer -->
-  <script src="https://unpkg.com/@readyplayerme/visage@latest"></script>
+  <script>
+    function goToAvatar() {
+      window.location.href = "avatar.html";
+    }
+  </script>
+
 </head>
 
 <body>
 
-  <h1>🤖 أفاتار المؤتمر – المساعد الذكي</h1>
-  <p>روبوت متحرك يجيب على أسئلتك</p>
+  <div class="top-header">
+    <img src="logo.jpg" alt="Conference Logo">
+    <div class="title-block">
+      <div class="main-title">Chemistry Horizons – SSC2 2026</div>
+      <div class="sub-title">Jerash University • Second Scientific Conference in Chemistry</div>
+    </div>
+  </div>
 
-  <!-- صندوق عرض الأفاتار -->
-  <div id="avatar-container"></div>
+  <div class="container">
 
-  <!-- صندوق الأسئلة -->
-  <div id="question-box">
-    <input type="text" id="question" placeholder="اكتب سؤالك هنا..." />
-    <button onclick="askBot()">إرسال</button>
+    <div class="icon-row">
+
+      <div class="icon-card" onclick="showSection('attendance')">
+        <div class="icon-emoji">📝</div>
+        <strong>تسجيل الحضور</strong>
+        <div style="font-size:13px;color:#9ca3af;">الإسم – الجامعة – البريد الإلكتروني</div>
+      </div>
+
+      <div class="icon-card" onclick="goToAvatar()">
+        <div class="icon-emoji">🤖</div>
+        <strong>أفاتار المؤتمر</strong>
+        <div style="font-size:13px;color:#9ca3af;">يتحدث العربية + ترجمة إنجليزية</div>
+      </div>
+
+      <div class="icon-card" onclick="showSection('schedule')">
+        <div class="icon-emoji">📅</div>
+        <strong>جدول المؤتمر</strong>
+        <div style="font-size:13px;color:#9ca3af;">عرض الجلسات والمحاور</div>
+      </div>
+
+    </div>
+
+    <!-- قسم تسجيل الحضور -->
+    <div id="attendance" class="section">
+      <h2>تسجيل الحضور</h2>
+
+      <label>الاسم الكامل</label>
+      <input id="name" type="text" placeholder="اكتب اسمك">
+
+      <label>الجامعة</label>
+      <input id="university" type="text" placeholder="اسم الجامعة">
+
+      <label>البريد الإلكتروني</label>
+      <input id="email" type="email" placeholder="example@domain.com">
+
+      <button onclick="registerAttendance()">تسجيل الحضور</button>
+      <div id="regMsg" class="msg"></div>
+    </div>
+
+    <!-- قسم جدول المؤتمر -->
+    <div id="schedule" class="section">
+      <h2>جدول المؤتمر</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>اليوم</th>
+            <th>الوقت</th>
+            <th>عنوان الجلسة</th>
+            <th>المتحدث</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>اليوم الأول</td>
+            <td>10:00 - 11:00</td>
+            <td>الجلسة الافتتاحية</td>
+            <td>رئيس المؤتمر</td>
+          </tr>
+          <tr>
+            <td>اليوم الأول</td>
+            <td>11:30 - 13:00</td>
+            <td>آفاق الكيمياء الخضراء</td>
+            <td>د. مثال</td>
+          </tr>
+          <tr>
+            <td>اليوم الثاني</td>
+            <td>10:00 - 11:30</td>
+            <td>التطبيقات الصناعية للكيمياء التحليلية</td>
+            <td>د. مثال آخر</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
   </div>
 
   <script>
-    // تحميل روبوت جاهز من ReadyPlayerMe
-    const avatarUrl = "https://models.readyplayer.me/65a7a4a3758e2d309f32e3d4.glb"; 
-    // (هذا روبوت افتراضي جاهز — متحرك بالكامل)
-
-    // عرض الأفاتار داخل الـ container
-    const container = document.getElementById("avatar-container");
-
-    const viewer = new window.RPMVisage.AvatarScene({
-      container: container,
-      avatarUrl: avatarUrl,
-      idleAnimation: true,
-      autoRotate: true,
-      lipsync: true,
-    });
-
-    // وظيفة التحدث
-    function speak(text) {
-      const synth = window.speechSynthesis;
-      const utter = new SpeechSynthesisUtterance(text);
-      utter.lang = "ar-SA";
-      synth.speak(utter);
+    // إظهار الأقسام
+    function showSection(id) {
+      document.querySelectorAll(".section").forEach(sec => sec.classList.remove("active"));
+      document.getElementById(id).classList.add("active");
     }
 
-    // الرد على المستخدم
-    function askBot() {
-      const q = document.getElementById("question").value.trim();
-      if (!q) return;
+    // عرض قسم الحضور افتراضيًا
+    showSection("attendance");
 
-      // تشغيل أنيميشن الفم
-      viewer.playTalkingAnimation();
+    // حفظ الحضور
+    async function registerAttendance() {
+      const name = document.getElementById("name").value.trim();
+      const university = document.getElementById("university").value.trim();
+      const email = document.getElementById("email").value.trim();
+      const msgEl = document.getElementById("regMsg");
 
-      // الرد الافتراضي (يمكن ربطه بالخادم لاحقًا)
-      let answer = "شكراً على سؤالك! سيتم الإجابة بشكل دقيق من خلال قاعدة البيانات.";
+      msgEl.textContent = "";
+      msgEl.className = "msg";
 
-      speak(answer);
+      if (!name || !university || !email) {
+        msgEl.textContent = "الرجاء تعبئة جميع الحقول.";
+        msgEl.classList.add("err");
+        return;
+      }
 
-      setTimeout(() => viewer.stopTalkingAnimation(), answer.length * 80);
+      try {
+        const res = await fetch("/register", {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({ name, university, email })
+        });
+
+        const data = await res.json();
+
+        if (data.ok) {
+          msgEl.textContent = "تم تسجيل حضورك بنجاح";
+          msgEl.classList.add("ok");
+        } else {
+          msgEl.textContent = "حدث خطأ أثناء التسجيل.";
+          msgEl.classList.add("err");
+        }
+
+      } catch (err) {
+        msgEl.textContent = "تعذر الاتصال بالخادم.";
+        msgEl.classList.add("err");
+      }
     }
+
   </script>
 
 </body>
