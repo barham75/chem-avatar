@@ -1,199 +1,165 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>أفاتار المؤتمر – المساعد الذكي</title>
+<meta charset="UTF-8">
+<title>Conference Avatar Assistant</title>
 
-  <style>
+<style>
     body {
-      margin: 0;
-      background: #000814;
-      color: white;
-      font-family: Tahoma, Arial;
-      direction: rtl;
-      text-align: center;
+        background: #000814;
+        color: #fff;
+        font-family: Tahoma, Arial;
+        text-align: center;
+        margin: 0;
     }
 
     h1 {
-      margin-top: 20px;
-      font-size: 26px;
+        margin-top: 20px;
+        font-size: 26px;
     }
 
     #avatar-container {
-      width: 100%;
-      height: 450px;
-      background: #001d3d;
-      border-top: 2px solid #003566;
-      border-bottom: 2px solid #003566;
-      margin-top: 20px;
+        width: 100%;
+        height: 420px;
+        background: #001d3d;
     }
 
-    #question-box {
-      margin-top: 20px;
+    #chat-area {
+        width: 80%;
+        margin: 20px auto;
+        padding: 15px;
+        background: #001021;
+        border-radius: 12px;
+        height: 260px;
+        overflow-y: auto;
+        text-align: left;
+    }
+
+    .bubble {
+        padding: 12px;
+        margin-bottom: 12px;
+        border-radius: 12px;
+        max-width: 80%;
+    }
+
+    .q {
+        background: #003566;
+        color: #fca311;
+        align-self: flex-start;
+    }
+
+    .a {
+        background: #001d3d;
+        color: #80ed99;
+        align-self: flex-end;
+    }
+
+    #controls {
+        margin-top: 15px;
     }
 
     input {
-      width: 60%;
-      padding: 12px;
-      border-radius: 10px;
-      border: none;
-      font-size: 18px;
+        width: 50%;
+        padding: 10px;
+        border-radius: 10px;
+        border: none;
     }
 
     button {
-      padding: 12px 20px;
-      font-size: 18px;
-      border-radius: 10px;
-      border: none;
-      background: #00b4d8;
-      color: white;
-      cursor: pointer;
-      margin-right: 10px;
+        padding: 10px 15px;
+        margin-right: 10px;
+        border-radius: 10px;
+        border: none;
+        cursor: pointer;
     }
 
-    .chat-log {
-      width: 80%;
-      margin: 20px auto;
-      background: #001021;
-      padding: 15px;
-      border-radius: 12px;
-      text-align: right;
-    }
+    .send-btn { background: #00b4d8; color: white; }
+    .voice-btn { background: #fca311; }
+    .back-btn  { background: #94d2bd; margin-top: 15px; }
+</style>
 
-    .chat-item {
-      margin-bottom: 15px;
-      padding: 10px;
-      background: #001d3d;
-      border-radius: 10px;
-    }
+<script src="https://unpkg.com/@readyplayerme/visage@latest"></script>
 
-    .english {
-      color: #fca311;
-      font-size: 15px;
-      margin-bottom: 5px;
-    }
-
-    .back-btn {
-      margin-top: 20px;
-      background: #94d2bd;
-      color: #000;
-    }
-  </style>
-
-  <!-- ReadyPlayerMe Avatar Renderer -->
-  <script src="https://unpkg.com/@readyplayerme/visage@latest"></script>
 </head>
-
 <body>
 
-  <h1>🤖 أفاتار المؤتمر – المساعد الذكي</h1>
+<h1>🤖 Intelligent Avatar – Chemistry Conference</h1>
 
-  <div id="avatar-container"></div>
+<div id="avatar-container"></div>
 
-  <div id="question-box">
-    <input type="text" id="question" placeholder="اكتب سؤالك هنا..." />
-    <button onclick="askBot()">إرسال</button>
-    <button onclick="startListening()">🎤 اسأل صوتياً</button>
-  </div>
+<div id="chat-area"></div>
 
-  <!-- منطقة عرض السؤال والجواب -->
-  <div id="chatLog" class="chat-log"></div>
+<div id="controls">
+    <input id="question" placeholder="Type your question...">
+    <button class="send-btn" onclick="askBot()">Send</button>
+    <button class="voice-btn" onclick="speakNow()">🎤 Voice Question</button>
+</div>
 
-  <button class="back-btn" onclick="window.location.href='index.html'">العودة</button>
+<button class="back-btn" onclick="window.location.href='index.html'">Back</button>
 
-  <script>
-    const avatarUrl = "https://models.readyplayer.me/65a7a4a3758e2d309f32e3d4.glb";
+<script>
+const avatarUrl = "https://models.readyplayer.me/65a7a4a3758e2d309f32e3d4.glb";
 
-    const container = document.getElementById("avatar-container");
-    const chatLog = document.getElementById("chatLog");
+const viewer = new window.RPMVisage.AvatarScene({
+    container: document.getElementById("avatar-container"),
+    avatarUrl: avatarUrl,
+    idleAnimation: true,
+    autoRotate: true,
+    lipsync: true,
+});
 
-    const viewer = new window.RPMVisage.AvatarScene({
-      container: container,
-      avatarUrl: avatarUrl,
-      idleAnimation: true,
-      autoRotate: true,
-      lipsync: true,
+function addBubble(text, type) {
+    let div = document.createElement("div");
+    div.className = "bubble " + (type === "q" ? "q" : "a");
+    div.innerHTML = text;
+    document.getElementById("chat-area").appendChild(div);
+    document.getElementById("chat-area").scrollTop = 999999;
+}
+
+async function askBot() {
+    let q = document.getElementById("question").value.trim();
+    if (!q) return;
+
+    addBubble("Question: " + q, "q");
+
+    viewer.playTalkingAnimation();
+
+    const res = await fetch("/ask", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ question: q })
     });
 
-    // نطق عربي
-    function speak(text) {
-      const synth = window.speechSynthesis;
-      const utter = new SpeechSynthesisUtterance(text);
-      utter.lang = "ar-SA";
-      utter.rate = 1.05;
-      synth.speak(utter);
+    const data = await res.json();
+
+    addBubble("EN Answer: " + data.answer_en, "a");
+
+    if (data.voice) {
+        let audio = new Audio("data:audio/wav;base64," + data.voice);
+        audio.play();
+        audio.onended = () => viewer.stopTalkingAnimation();
     }
 
-    // عرض EN فقط
-    function addChat(questionEn, answerEn) {
-      const item = document.createElement("div");
-      item.className = "chat-item";
+    document.getElementById("question").value = "";
+}
 
-      item.innerHTML = `
-        <div class="english"><strong>Question:</strong> ${questionEn}</div>
-        <div class="english"><strong>Answer:</strong> ${answerEn}</div>
-      `;
-
-      chatLog.prepend(item);
-    }
-
-    // إرسال للسيرفر
-    async function askBot() {
-      const q = document.getElementById("question").value.trim();
-      if (!q) return;
-
-      viewer.playTalkingAnimation();
-
-      let answerAr = "";
-      let answerEn = "";
-      let questionEn = "";
-
-      try {
-        const res = await fetch("/ask", {
-          method: "POST",
-          headers: {"Content-Type": "application/json"},
-          body: JSON.stringify({ question: q })
-        });
-
-        const data = await res.json();
-        answerAr = data.answer_ar;
-        answerEn = data.answer_en;
-        questionEn = data.question_en;
-
-      } catch {
-        answerAr = "حدث خطأ.";
-        answerEn = "Server error.";
-        questionEn = "Error.";
-      }
-
-      addChat(questionEn, answerEn);
-      speak(answerAr);
-
-      setTimeout(() => viewer.stopTalkingAnimation(), answerAr.length * 85);
-
-      document.getElementById("question").value = "";
-    }
-
-    // الاستقبال الصوتي
-    function startListening() {
-      if (!("webkitSpeechRecognition" in window)) {
-        alert("متصفحك لا يدعم التعرف الصوتي.");
+function speakNow() {
+    if (!("webkitSpeechRecognition" in window)) {
+        alert("Voice input not supported");
         return;
-      }
-
-      const rec = new webkitSpeechRecognition();
-      rec.lang = "ar-SA";
-      rec.interimResults = false;
-
-      rec.onresult = function(event) {
-        const speech = event.results[0][0].transcript;
-        document.getElementById("question").value = speech;
-        askBot();
-      };
-
-      rec.start();
     }
-  </script>
+
+    let rec = new webkitSpeechRecognition();
+    rec.lang = "ar-SA";
+
+    rec.onresult = ev => {
+        document.getElementById("question").value = ev.results[0][0].transcript;
+        askBot();
+    };
+
+    rec.start();
+}
+</script>
 
 </body>
 </html>
