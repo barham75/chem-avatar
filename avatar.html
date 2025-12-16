@@ -1,205 +1,158 @@
 <!DOCTYPE html>
 <html lang="ar">
 <head>
-  <meta charset="UTF-8">
-  <title>أفاتار المؤتمر – Chemistry SSC2 2026</title>
+<meta charset="UTF-8" />
+<title>أفاتار المؤتمر – المساعد الافتراضي</title>
 
-  <style>
+<style>
     body {
-      margin: 0;
-      font-family: Tahoma, Arial, sans-serif;
-      direction: rtl;
-      background: #020617;
-      color: #e5e7eb;
-      text-align: center;
-      padding: 20px;
+        margin: 0;
+        background: #020617;
+        font-family: Tahoma, Arial;
+        direction: rtl;
+        text-align: center;
+        color: white;
+        padding: 20px;
     }
 
-    h1 {
-      font-size: 38px;
-      margin-bottom: 10px;
-      color: #fff;
-    }
-
-    /* --- Avatar --- */
-    .avatar-box {
-      width: 260px;
-      height: 260px;
-      margin: 25px auto;
-      border-radius: 50%;
-      background: #0f172a;
-      border: 4px solid #22c55e;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 120px;
-      animation: pulse 2s infinite;
+    .avatar {
+        width: 220px;
+        height: 220px;
+        margin: 20px auto;
+        border-radius: 50%;
+        background: #0f172a;
+        border: 4px solid #22c55e;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 110px;
+        animation: pulse 2s infinite;
     }
 
     @keyframes pulse {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.05); }
-      100% { transform: scale(1); }
-    }
-
-    /* --- Main Boxes --- */
-    .box {
-      width: 90%;
-      max-width: 900px;
-      margin: 20px auto;
-      background: #0f172a;
-      padding: 20px;
-      border-radius: 18px;
-      border: 1px solid #1e293b;
-      text-align: right;
+        0% { transform: scale(1); }
+        50% { transform: scale(1.07); }
+        100% { transform: scale(1); }
     }
 
     input {
-      width: 100%;
-      padding: 12px;
-      border-radius: 10px;
-      border: none;
-      margin-top: 10px;
-      font-size: 17px;
+        width: 80%;
+        padding: 12px;
+        border-radius: 10px;
+        border: none;
+        margin-top: 10px;
+        font-size: 18px;
     }
 
     button {
-      margin-top: 12px;
-      padding: 12px 25px;
-      border-radius: 10px;
-      background: #22c55e;
-      border: none;
-      color: #000;
-      font-weight: bold;
-      cursor: pointer;
-      font-size: 16px;
+        padding: 10px 20px;
+        margin-top: 10px;
+        border: none;
+        background: #22c55e;
+        color: black;
+        font-size: 16px;
+        border-radius: 8px;
+        cursor: pointer;
     }
 
-    button:hover {
-      background: #16a34a;
+    .box {
+        width: 90%;
+        margin: 20px auto;
+        background: #0f172a;
+        padding: 15px;
+        border-radius: 15px;
+        border: 1px solid #1e293b;
+        text-align: right;
     }
-
-    audio {
-      margin-top: 15px;
-      width: 100%;
-    }
-
-    .label-title {
-      color: #38bdf8;
-      font-size: 20px;
-      margin-bottom: 10px;
-    }
-
-    .text-out {
-      margin-top: 6px;
-      font-size: 18px;
-      line-height: 1.7;
-    }
-
-  </style>
+</style>
 </head>
 
 <body>
 
-  <h1>أفاتار المؤتمر – المساعد الافتراضي</h1>
+<h1>أفاتار المؤتمر – المساعد الافتراضي</h1>
 
-  <!-- AVATAR -->
-  <div class="avatar-box">👨‍🔬</div>
+<div class="avatar">👨‍🔬</div>
 
-  <!-- السؤال -->
-  <div class="box">
-    <label>اكتب سؤالك بالعربية:</label>
-    <input id="question" type="text" placeholder="مثال: ما أهداف المؤتمر؟">
+<div class="box">
+    <label>اكتب سؤالك:</label>
+    <input id="question" placeholder="مثال: ما أهداف المؤتمر؟" />
+
     <button onclick="ask()">إرسال</button>
-
     <br><br>
 
     <button onclick="startRecording()">🎤 اسأل صوتياً</button>
     <button onclick="stopRecording()">⏹ إيقاف</button>
 
     <audio id="audioPlayer" controls></audio>
-  </div>
+</div>
 
-  <!-- النتائج -->
-  <div class="box">
-    <div class="label-title">السؤال (بالإنجليزية):</div>
-    <div id="q_en" class="text-out"></div>
+<div class="box">
+    <h3>السؤال (بالإنجليزية)</h3>
+    <div id="q_en" style="color:#38bdf8"></div>
 
-    <div class="label-title" style="color:#a5b4fc;">الإجابة (بالعربية):</div>
-    <div id="a_ar" class="text-out"></div>
+    <h3>الإجابة (بالعربية)</h3>
+    <div id="a_ar" style="color:#a5b4fc"></div>
 
-    <div class="label-title" style="color:#fbbf24;">الإجابة (بالإنجليزية):</div>
-    <div id="a_en" class="text-out"></div>
-  </div>
-
+    <h3>الإجابة (بالإنجليزية)</h3>
+    <div id="a_en" style="color:#fbbf24"></div>
+</div>
 
 
-  <script>
-    // ----------------------------------
-    // إرسال سؤال نصّي إلى /ask
-    // ----------------------------------
-    async function ask() {
-      const question = document.getElementById("question").value.trim();
-      if (!question) return;
+<script>
+async function ask() {
+    const q = document.getElementById("question").value.trim();
+    if (!q) return;
 
-      const res = await fetch("/ask", {
+    const res = await fetch("/ask", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ question })
-      });
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({ question: q })
+    });
 
-      const data = await res.json();
+    const data = await res.json();
 
-      document.getElementById("q_en").textContent = data.question_en;
-      document.getElementById("a_ar").textContent = data.answer_ar;
-      document.getElementById("a_en").textContent = data.answer_en;
+    document.getElementById("q_en").textContent = data.question_en;
+    document.getElementById("a_ar").textContent = data.answer_ar;
+    document.getElementById("a_en").textContent = data.answer_en;
 
-      // تشغيل الصوت
-      if (data.voice) {
+    if (data.voice) {
         const audio = document.getElementById("audioPlayer");
         audio.src = "data:audio/wav;base64," + data.voice;
         audio.play();
-      }
     }
+}
 
+let recorder;
+let audioChunks = [];
 
+async function startRecording() {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    recorder = new MediaRecorder(stream);
 
-    // ----------------------------------
-    // تسجيل الصوت
-    // ----------------------------------
-    let mediaRecorder;
-    let audioChunks = [];
+    audioChunks = [];
+    recorder.ondataavailable = e => audioChunks.push(e.data);
 
-    async function startRecording() {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      mediaRecorder = new MediaRecorder(stream);
-      audioChunks = [];
-
-      mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
-
-      mediaRecorder.onstop = async () => {
+    recorder.onstop = async () => {
         const blob = new Blob(audioChunks, { type: "audio/webm" });
-        const formData = new FormData();
-        formData.append("audio", blob, "speech.webm");
+        const fd = new FormData();
+        fd.append("audio", blob, "speech.webm");
 
-        const res = await fetch("/stt", { method: "POST", body: formData });
+        const res = await fetch("/stt", { method: "POST", body: fd });
         const data = await res.json();
+        document.getElementById("question").value = data.text;
+    };
 
-        document.getElementById("question").value = data.text;  // وضع النص في خانة السؤال
-      };
+    recorder.start();
+    alert("🎙 بدأ التسجيل...");
+}
 
-      mediaRecorder.start();
-      alert("🎙 بدأ التسجيل...");
-    }
-
-    function stopRecording() {
-      if (mediaRecorder) {
-        mediaRecorder.stop();
+function stopRecording() {
+    if (recorder) {
+        recorder.stop();
         alert("⏹ تم إيقاف التسجيل");
-      }
     }
-
-  </script>
+}
+</script>
 
 </body>
 </html>
