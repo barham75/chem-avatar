@@ -9,13 +9,13 @@ app = Flask(__name__)
 CORS(app)
 
 # --------------------------
-# 1) إعداد API KEY
+# اتصال OpenAI الجديد
 # --------------------------
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 
 # --------------------------
-# 2) تحميل ملف Q/A من Word
+# تحميل ملف المؤتمر Q/A
 # --------------------------
 def load_docx():
     qa = {}
@@ -32,13 +32,15 @@ def load_docx():
         elif t.startswith("A:") or t.startswith("ج:"):
             if question:
                 qa[question] = t[2:].strip()
-
     return qa
 
 
 KB = load_docx()
 
 
+# --------------------------
+# اختيار أفضل إجابة
+# --------------------------
 def best_match(q):
     q = q.lower().strip()
     for k in KB:
@@ -48,13 +50,13 @@ def best_match(q):
 
 
 # --------------------------
-# 3) الترجمة (Model: gpt-4o-mini)
+# الترجمة EN باستخدام ChatCompletions
 # --------------------------
 def translate(text):
     res = client.chat.completions.create(
         model="gpt-4o-mini",
         messages=[
-            {"role": "system", "content": "Translate to English."},
+            {"role": "system", "content": "Translate to English in academic style."},
             {"role": "user", "content": text}
         ]
     )
@@ -62,50 +64,48 @@ def translate(text):
 
 
 # --------------------------
-# 4) توليد صوت باللهجة الأردنية (TTS)
+# توليد صوت عربي باللهجة الأردنية
 # --------------------------
 def tts_ar(text):
-    response = client.audio.speech.create(
+    audio = client.audio.speech.create(
         model="gpt-4o-mini-tts",
         voice="omar",
-        input=f"اقرأ باللهجة الأردنية وبأسلوب محاضر جامعي:\n{text}",
+        input=f"اقرأ النص بلهجة أردنية واضحة: {text}",
         format="wav"
     )
-    audio_bytes = response.read()
+
+    audio_bytes = audio.read()
     return base64.b64encode(audio_bytes).decode()
 
 
 # --------------------------
-# 5) تحويل كلام إلى نص (STT)
+# STT تحويل صوت → نص
 # --------------------------
 @app.route("/stt", methods=["POST"])
 def stt():
     audio_file = request.files["audio"]
 
-    transcription = client.audio.transcriptions.create(
-        model="gpt-4o-transcribe",
+    result = client.audio.transcriptions.create(
+        model="gpt-4o-mini-transcribe",
         file=audio_file
     )
 
-    return jsonify({"text": transcription.text})
+    return jsonify({"text": result.text})
 
 
 # --------------------------
-# 6) استقبال سؤال نصي
+# استقبال سؤال نصي
 # --------------------------
 @app.route("/ask", methods=["POST"])
 def ask():
     data = request.get_json()
     q_ar = data.get("question", "")
 
-    # جواب عربي
     answer_ar = best_match(q_ar)
 
-    # ترجمة السؤال والجواب
     q_en = translate(q_ar)
     a_en = translate(answer_ar)
 
-    # صوت
     voice_b64 = tts_ar(answer_ar)
 
     return jsonify({
@@ -117,7 +117,7 @@ def ask():
 
 
 # --------------------------
-# 7) عرض صفحة HTML
+# تقديم صفحة الأفاتار
 # --------------------------
 @app.route("/")
 def index():
@@ -129,8 +129,5 @@ def static_files(path):
     return send_from_directory(".", path)
 
 
-# --------------------------
-# 8) تشغيل الخادم
-# --------------------------
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
