@@ -4,3 +4,7 @@ python-docx
 openai==1.55.0
 gunicorn
 Werkzeug==3.0.1
+flask
+flask-cors
+python-docx
+openai
